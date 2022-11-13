@@ -108,6 +108,10 @@
 #include "util/string_util.h"
 #include "utilities/trace/replayer_impl.h"
 
+#include <iostream>
+
+using namespace std;
+
 namespace ROCKSDB_NAMESPACE {
 
 const std::string kDefaultColumnFamilyName("default");
@@ -2954,6 +2958,7 @@ Status DBImpl::CreateColumnFamily(const ColumnFamilyOptions& cf_options,
                                   const std::string& column_family,
                                   ColumnFamilyHandle** handle) {
   assert(handle != nullptr);
+  cout<<"Step3";
   Status s = CreateColumnFamilyImpl(cf_options, column_family, handle);
   if (s.ok()) {
     s = WriteOptionsFile(true /*need_mutex_lock*/,
@@ -3023,7 +3028,7 @@ Status DBImpl::CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
                                       ColumnFamilyHandle** handle) {
   Status s;
   *handle = nullptr;
-
+  cout<<"step 4";
   DBOptions db_options =
       BuildDBOptions(immutable_db_options_, mutable_db_options_);
   s = ColumnFamilyData::ValidateOptions(db_options, cf_options);
@@ -3079,7 +3084,7 @@ Status DBImpl::CreateColumnFamilyImpl(const ColumnFamilyOptions& cf_options,
       assert(cfd != nullptr);
       InstallSuperVersionAndScheduleWork(cfd, &sv_context,
                                          *cfd->GetLatestMutableCFOptions());
-
+      cout<<"step 5";
       if (!cfd->mem()->IsSnapshotSupported()) {
         is_snapshot_supported_ = false;
       }

@@ -5,6 +5,7 @@
 
 #include <cstdio>
 #include <string>
+#include <iostream>
 
 #include "rocksdb/db.h"
 #include "rocksdb/options.h"
@@ -24,6 +25,8 @@ std::string kDBPath = "C:\\Windows\\TEMP\\rocksdb_simple_example";
 std::string kDBPath = "/tmp/rocksdb_simple_example";
 #endif
 
+using namespace std;
+
 int main() {
   DB* db;
   Options options;
@@ -35,6 +38,7 @@ int main() {
 
   // open DB
   Status s = DB::Open(options, kDBPath, &db);
+  cout<<"Tanuja1";
   assert(s.ok());
 
   // Put key-value

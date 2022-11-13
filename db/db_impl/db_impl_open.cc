@@ -24,6 +24,9 @@
 #include "rocksdb/wal_filter.h"
 #include "test_util/sync_point.h"
 #include "util/rate_limiter.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 Options SanitizeOptions(const std::string& dbname, const Options& src,
@@ -1620,6 +1623,7 @@ Status DBImpl::WriteLevel0TableForRecovery(int job_id, ColumnFamilyData* cfd,
 }
 
 Status DB::Open(const Options& options, const std::string& dbname, DB** dbptr) {
+  cout<<"Inside Open";
   DBOptions db_options(options);
   ColumnFamilyOptions cf_options(options);
   std::vector<ColumnFamilyDescriptor> column_families;
@@ -1776,6 +1780,7 @@ Status DBImpl::Open(const DBOptions& db_options, const std::string& dbname,
   if (!s.ok()) {
     return s;
   }
+  cout<<"step 2";
 
   s = ValidateOptions(db_options, column_families);
   if (!s.ok()) {

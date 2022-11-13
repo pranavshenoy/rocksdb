@@ -28,6 +28,9 @@
 #include "trace_replay/block_cache_tracer.h"
 #include "util/hash_containers.h"
 #include "util/thread_local.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -269,7 +272,7 @@ class ColumnFamilySet;
 class ColumnFamilyData {
  public:
   ~ColumnFamilyData();
-
+  // ColumnFamilyData --  initialize vector and push three memtables
   // thread-safe
   uint32_t GetID() const { return id_; }
   // thread-safe
@@ -349,7 +352,14 @@ class ColumnFamilyData {
   InternalStats* internal_stats() { return internal_stats_.get(); }
 
   MemTableList* imm() { return &imm_; }
-  MemTable* mem() { return mem_; }
+  MemTable* mem() { 
+    cout<<"Step6";
+    // routing logic
+    // parse prefix 
+    // get the memtable against prefix index
+    // 
+    return mem_; 
+  }
 
   bool IsEmpty() {
     return mem()->GetFirstSequenceNumber() == 0 && imm()->NumNotFlushed() == 0;
@@ -363,6 +373,8 @@ class ColumnFamilyData {
   uint64_t GetLiveSstFilesSize() const;   // REQUIRE: DB mutex held
   uint64_t GetTotalBlobFileSize() const;  // REQUIRE: DB mutex held
   void SetMemtable(MemTable* new_mem) {
+    // 
+    // replace in the vector
     uint64_t memtable_id = last_memtable_id_.fetch_add(1) + 1;
     new_mem->SetID(memtable_id);
     mem_ = new_mem;
