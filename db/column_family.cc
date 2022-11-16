@@ -42,6 +42,9 @@
 #include "util/cast_util.h"
 #include "util/compression.h"
 
+
+using namespace std;
+
 namespace ROCKSDB_NAMESPACE {
 
 ColumnFamilyHandleImpl::ColumnFamilyHandleImpl(
@@ -1664,7 +1667,14 @@ uint64_t ColumnFamilyMemTablesImpl::GetLogNumber() const {
   return current_->GetLogNumber();
 }
 
-MemTable* ColumnFamilyMemTablesImpl::GetMemTable() const {
+MemTable* ColumnFamilyMemTablesImpl::GetMemTable(const Slice& key) const {
+  // uint32_t key_size = static_cast<uint32_t>(key.size());
+  // uint32_t internal_key_size = key_size + 8;
+  // char* buf = nullptr;
+
+  // char* p = EncodeVarint32(buf, internal_key_size);
+  // memcpy(p, key.data(), key_size);
+  cout<<"key from getmemtable"<<key.data();
   assert(current_ != nullptr);
   return current_->mem();
 }
