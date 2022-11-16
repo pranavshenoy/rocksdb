@@ -13,6 +13,7 @@
 #include <cinttypes>
 #include <limits>
 #include <sstream>
+#include <iostream>
 #include <string>
 #include <vector>
 
@@ -1107,6 +1108,7 @@ uint64_t ColumnFamilyData::GetLiveSstFilesSize() const {
 
 MemTable* ColumnFamilyData::ConstructNewMemtable(
     const MutableCFOptions& mutable_cf_options, SequenceNumber earliest_seq) {
+      std::cout<<"New Memtable created with seq. Num "<<earliest_seq<<std::endl;
   return new MemTable(internal_comparator_, ioptions_, mutable_cf_options,
                       write_buffer_manager_, earliest_seq, id_);
 }
@@ -1116,8 +1118,14 @@ void ColumnFamilyData::CreateNewMemtable(
   if (mem_ != nullptr) {
     delete mem_->Unref();
   }
-  SetMemtable(ConstructNewMemtable(mutable_cf_options, earliest_seq));
-  mem_->Ref();
+  MemTable* mt1 = ConstructNewMemtable(mutable_cf_options, earliest_seq);
+  MemTable* mt2 = ConstructNewMemtable(mutable_cf_options, earliest_seq);
+  SetMemtable(mt1);
+  SetMemtable(mt2);
+  mt1->Ref();
+  mt2->Ref();
+  // SetMemtable(ConstructNewMemtable(mutable_cf_options, earliest_seq));
+  // mem_->Ref();
 }
 
 bool ColumnFamilyData::NeedsCompaction() const {
@@ -1129,7 +1137,7 @@ Compaction* ColumnFamilyData::PickCompaction(
     const MutableCFOptions& mutable_options,
     const MutableDBOptions& mutable_db_options, LogBuffer* log_buffer) {
   SequenceNumber earliest_mem_seqno =
-      std::min(mem_->GetEarliestSequenceNumber(),
+      std::min(mem()->GetEarliestSequenceNumber(),
                imm_.current()->GetEarliestSequenceNumber(false));
   auto* result = compaction_picker_->PickCompaction(
       GetName(), mutable_options, mutable_db_options, current_->storage_info(),
@@ -1213,7 +1221,7 @@ Compaction* ColumnFamilyData::CompactRange(
     InternalKey** compaction_end, bool* conflict,
     uint64_t max_file_num_to_ignore, const std::string& trim_ts) {
   SequenceNumber earliest_mem_seqno =
-      std::min(mem_->GetEarliestSequenceNumber(),
+      std::min(mem()->GetEarliestSequenceNumber(),
                imm_.current()->GetEarliestSequenceNumber(false));
   auto* result = compaction_picker_->CompactRange(
       GetName(), mutable_cf_options, mutable_db_options,
@@ -1317,7 +1325,7 @@ void ColumnFamilyData::InstallSuperVersion(
     const MutableCFOptions& mutable_cf_options) {
   SuperVersion* new_superversion = sv_context->new_superversion.release();
   new_superversion->mutable_cf_options = mutable_cf_options;
-  new_superversion->Init(this, mem_, imm_.current(), current_);
+  new_superversion->Init(this, mem(), imm_.current(), current_);
   SuperVersion* old_superversion = super_version_;
   super_version_ = new_superversion;
   ++super_version_number_;
@@ -1343,7 +1351,7 @@ void ColumnFamilyData::InstallSuperVersion(
 
     if (old_superversion->mutable_cf_options.write_buffer_size !=
         mutable_cf_options.write_buffer_size) {
-      mem_->UpdateWriteBufferSize(mutable_cf_options.write_buffer_size);
+      mem()->UpdateWriteBufferSize(mutable_cf_options.write_buffer_size);
     }
     if (old_superversion->write_stall_condition !=
         new_superversion->write_stall_condition) {

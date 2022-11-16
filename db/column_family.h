@@ -13,6 +13,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 #include "cache/cache_reservation_manager.h"
 #include "db/memtable_list.h"
@@ -349,7 +350,26 @@ class ColumnFamilyData {
   InternalStats* internal_stats() { return internal_stats_.get(); }
 
   MemTableList* imm() { return &imm_; }
-  MemTable* mem() { return mem_; }
+  // MemTable* mem(KEY INT) {
+  //    /*
+  //     ROUTER THAT RETURNS RIGHT MEMTABLE
+  //    */
+  //    //PRANAV: THIS IS OUR ROUTER
+  //    return mem_; 
+
+  // }
+  
+  MemTable* mem() {
+     //PRANAV: THIS IS OUR ROUTER
+     std::cout<<"Size of mem() "<<active_memtable.size()<<std::endl;
+     int size = (int) active_memtable.size();
+     if(size == 0) {
+      return NULL;
+     }
+     return active_memtable[1];
+    //  return mem_; 
+
+  }
 
   bool IsEmpty() {
     return mem()->GetFirstSequenceNumber() == 0 && imm()->NumNotFlushed() == 0;
@@ -365,7 +385,9 @@ class ColumnFamilyData {
   void SetMemtable(MemTable* new_mem) {
     uint64_t memtable_id = last_memtable_id_.fetch_add(1) + 1;
     new_mem->SetID(memtable_id);
-    mem_ = new_mem;
+    //NOT right 
+    active_memtable.push_back(new_mem);
+    // mem_ = new_mem;
   }
 
   // calculate the oldest log needed for the durability of this column family
@@ -575,6 +597,7 @@ class ColumnFamilyData {
   WriteBufferManager* write_buffer_manager_;
 
   MemTable* mem_;
+  std::vector<MemTable*> active_memtable;
   MemTableList imm_;
   SuperVersion* super_version_;
 
