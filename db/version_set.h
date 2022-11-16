@@ -61,6 +61,9 @@
 #include "util/autovector.h"
 #include "util/coro_utils.h"
 #include "util/hash_containers.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -935,7 +938,7 @@ class Version {
 
   size_t GetMemoryUsageByTableReaders();
 
-  ColumnFamilyData* cfd() const { return cfd_; }
+  ColumnFamilyData* cfd() const { cout<<"cfd inner - version set.h 938\n"; return cfd_; }
 
   // Return the next Version in the linked list.
   Version* Next() const { return next_; }

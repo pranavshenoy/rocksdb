@@ -22,6 +22,9 @@
 #include "port/port.h"
 #include "rocksdb/slice.h"
 #include "util/coding_lean.h"
+#include <iostream>
+
+using namespace std;
 
 // Some processors does not allow unaligned access to memory
 #if defined(__sparc)
@@ -224,6 +227,7 @@ inline void PutVarint32Varint32Varint64(std::string* dst, uint32_t v1,
 inline void PutLengthPrefixedSlice(std::string* dst, const Slice& value) {
   PutVarint32(dst, static_cast<uint32_t>(value.size()));
   dst->append(value.data(), value.size());
+  cout<<"This is where key is appended: "<<dst<<"\n";
 }
 
 inline void PutLengthPrefixedSliceParts(std::string* dst, size_t total_bytes,
@@ -321,6 +325,7 @@ inline bool GetVarsignedint64(Slice* input, int64_t* value) {
 }
 
 inline bool GetLengthPrefixedSlice(Slice* input, Slice* result) {
+  cout<<"this gets key\n";
   uint32_t len = 0;
   if (GetVarint32(input, &len) && input->size() >= len) {
     *result = Slice(input->data(), len);

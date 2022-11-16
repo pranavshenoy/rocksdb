@@ -68,6 +68,9 @@
 #include "util/repeatable_thread.h"
 #include "util/stop_watch.h"
 #include "util/thread_local.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -2787,6 +2790,7 @@ inline Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
   }
   if (ts_for_read) {
     auto cfh = static_cast_with_check<ColumnFamilyHandleImpl>(column_family);
+    cout<< "cfd called\n";
     auto cfd = cfh->cfd();
     std::string current_ts_low = cfd->GetFullHistoryTsLow();
     if (!current_ts_low.empty() &&

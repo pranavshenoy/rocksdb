@@ -16,6 +16,9 @@
 #include "options/options_helper.h"
 #include "test_util/sync_point.h"
 #include "util/cast_util.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 // Convenience methods
@@ -25,6 +28,7 @@ Status DBImpl::Put(const WriteOptions& o, ColumnFamilyHandle* column_family,
   if (!s.ok()) {
     return s;
   }
+  cout<<"Step 1: Put in dbimpl\n";
   return DB::Put(o, column_family, key, val);
 }
 
@@ -137,6 +141,7 @@ void DBImpl::SetRecoverableStatePreReleaseCallback(
 }
 
 Status DBImpl::Write(const WriteOptions& write_options, WriteBatch* my_batch) {
+  cout<<"Step 5: Write inside DBIMPLT\n";
   Status s;
   if (write_options.protection_bytes_per_key > 0) {
     s = WriteBatchInternal::UpdateProtectionInfo(
@@ -175,6 +180,7 @@ Status DBImpl::WriteImpl(const WriteOptions& write_options,
                          size_t batch_cnt,
                          PreReleaseCallback* pre_release_callback,
                          PostMemTableCallback* post_memtable_callback) {
+                          cout<<"Step 6: WriteImpl in dbimpl\n";
   assert(!seq_per_batch_ || batch_cnt != 0);
   assert(my_batch == nullptr || my_batch->Count() == 0 ||
          write_options.protection_bytes_per_key == 0 ||
@@ -2274,6 +2280,7 @@ size_t DBImpl::GetWalPreallocateBlockSize(uint64_t write_buffer_size) const {
 // can call if they wish
 Status DB::Put(const WriteOptions& opt, ColumnFamilyHandle* column_family,
                const Slice& key, const Slice& value) {
+  cout<<"Step2: Put in DB 2278\n";
   // Pre-allocate size of write batch conservatively.
   // 8 bytes are taken by header, 4 bytes for count, 1 byte for type,
   // and we allocate 11 extra bytes for key length, as well as value length.

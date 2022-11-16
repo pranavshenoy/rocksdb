@@ -107,6 +107,9 @@
 #include "util/stop_watch.h"
 #include "util/string_util.h"
 #include "utilities/trace/replayer_impl.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -1937,6 +1940,7 @@ bool DBImpl::ShouldReferenceSuperVersion(const MergeContext& merge_context) {
 
 Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
                        GetImplOptions& get_impl_options) {
+                        cout<<"get from memtable and other levels\n";
   assert(get_impl_options.value != nullptr ||
          get_impl_options.merge_operands != nullptr ||
          get_impl_options.columns != nullptr);

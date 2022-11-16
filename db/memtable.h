@@ -31,6 +31,9 @@
 #include "util/dynamic_bloom.h"
 #include "util/hash.h"
 #include "util/hash_containers.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -275,6 +278,7 @@ class MemTable {
            ReadCallback* callback = nullptr, bool* is_blob_index = nullptr,
            bool do_merge = true) {
     SequenceNumber seq;
+    cout<<"get from active memtable\n";
     return Get(key, value, columns, timestamp, s, merge_context,
                max_covering_tombstone_seq, &seq, read_opts, immutable_memtable,
                callback, is_blob_index, do_merge);

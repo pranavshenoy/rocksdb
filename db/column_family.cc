@@ -40,6 +40,9 @@
 #include "util/autovector.h"
 #include "util/cast_util.h"
 #include "util/compression.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -1657,6 +1660,8 @@ uint64_t ColumnFamilyMemTablesImpl::GetLogNumber() const {
 }
 
 MemTable* ColumnFamilyMemTablesImpl::GetMemTable() const {
+  cout<<"called from PUT\n";
+  // add routing logic
   assert(current_ != nullptr);
   return current_->mem();
 }

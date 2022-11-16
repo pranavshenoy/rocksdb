@@ -29,6 +29,9 @@
 #include "rocksdb/types.h"
 #include "rocksdb/version.h"
 #include "rocksdb/wide_columns.h"
+#include <iostream>
+
+using namespace std;
 
 #ifdef _WIN32
 // Windows API macro interference
@@ -400,10 +403,12 @@ class DB {
                      const Slice& ts, const Slice& value) = 0;
   virtual Status Put(const WriteOptions& options, const Slice& key,
                      const Slice& value) {
+                      cout<<"Step2: Put 403\n";
     return Put(options, DefaultColumnFamily(), key, value);
   }
   virtual Status Put(const WriteOptions& options, const Slice& key,
                      const Slice& ts, const Slice& value) {
+                      cout<<"Step2: Put 408\n";
     return Put(options, DefaultColumnFamily(), key, ts, value);
   }
 

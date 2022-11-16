@@ -28,6 +28,9 @@
 #include "trace_replay/block_cache_tracer.h"
 #include "util/hash_containers.h"
 #include "util/thread_local.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -167,7 +170,7 @@ class ColumnFamilyHandleImpl : public ColumnFamilyHandle {
                          InstrumentedMutex* mutex);
   // destroy without mutex
   virtual ~ColumnFamilyHandleImpl();
-  virtual ColumnFamilyData* cfd() const { return cfd_; }
+  virtual ColumnFamilyData* cfd() const { cout<<"cfd inner - column family.h 170\n"; return cfd_; }
 
   virtual uint32_t GetID() const override;
   virtual const std::string& GetName() const override;
@@ -193,7 +196,7 @@ class ColumnFamilyHandleInternal : public ColumnFamilyHandleImpl {
         internal_cfd_(nullptr) {}
 
   void SetCFD(ColumnFamilyData* _cfd) { internal_cfd_ = _cfd; }
-  virtual ColumnFamilyData* cfd() const override { return internal_cfd_; }
+  virtual ColumnFamilyData* cfd() const override { cout<<"cfd inner - column family.h 196\n"; return internal_cfd_; }
 
  private:
   ColumnFamilyData* internal_cfd_;

@@ -68,6 +68,9 @@
 #include "util/coding.h"
 #include "util/duplicate_detector.h"
 #include "util/string_util.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -353,6 +356,7 @@ bool WriteBatch::HasRollback() const {
 Status ReadRecordFromWriteBatch(Slice* input, char* tag,
                                 uint32_t* column_family, Slice* key,
                                 Slice* value, Slice* blob, Slice* xid) {
+                                  cout<<"Reads from rep_";
   assert(key != nullptr && value != nullptr);
   *tag = (*input)[0];
   input->remove_prefix(1);
@@ -478,6 +482,7 @@ Status WriteBatch::Iterate(Handler* handler) const {
 Status WriteBatchInternal::Iterate(const WriteBatch* wb,
                                    WriteBatch::Handler* handler, size_t begin,
                                    size_t end) {
+                                    cout<<"called to write";
   if (begin > wb->rep_.size() || end > wb->rep_.size() || end < begin) {
     return Status::Corruption("Invalid start/end bounds for Iterate");
   }
@@ -797,6 +802,8 @@ Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
     PutVarint32(&b->rep_, column_family_id);
   }
   PutLengthPrefixedSlice(&b->rep_, key);
+  cout<<"printing rep i b"<<b->rep_;
+  // this must add key
   PutLengthPrefixedSlice(&b->rep_, value);
   b->content_flags_.store(
       b->content_flags_.load(std::memory_order_relaxed) | ContentFlags::HAS_PUT,
@@ -818,6 +825,7 @@ Status WriteBatchInternal::Put(WriteBatch* b, uint32_t column_family_id,
 Status WriteBatch::Put(ColumnFamilyHandle* column_family, const Slice& key,
                        const Slice& value) {
   size_t ts_sz = 0;
+  cout<<"Step 4: Put in writebatch 821";
   uint32_t cf_id = 0;
   Status s;
 
@@ -2015,6 +2023,7 @@ class MemTableInserter : public WriteBatch::Handler {
     assert(ret_status.ok());
 
     MemTable* mem = cf_mems_->GetMemTable();
+    // pass key
     auto* moptions = mem->GetImmutableMemTableOptions();
     // inplace_update_support is inconsistent with snapshots, and therefore with
     // any kind of transactions including the ones that use seq_per_batch
