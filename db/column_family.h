@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <vector>
 #include <iostream>
+#include <cctype>
 
 #include "cache/cache_reservation_manager.h"
 #include "db/memtable_list.h"
@@ -358,6 +359,22 @@ class ColumnFamilyData {
   //    return mem_; 
 
   // }
+
+  MemTable* mem(const Slice& key) {
+    // std::string s(key.ToString());
+    // string s;
+    // for(size_t i=0; i<key.size(); i++) {
+    //   s += key[i];
+    // }
+    // std::cout<<"key is "<<s<<"\n";
+  
+    if (96 < int(tolower(key[0])) && int(tolower(key[0])) < 110) { // 97-109 -> a-m both inclusive
+      std::cout<<"key "<<key.ToString()<<" goes to table 1\n";
+      return active_memtable[0];
+    }
+    std::cout<<"key "<<key.ToString()<<" goes to table 2\n";
+    return active_memtable[1];
+  }
   
   MemTable* mem() {
      //PRANAV: THIS IS OUR ROUTER
@@ -366,7 +383,7 @@ class ColumnFamilyData {
      if(size == 0) {
       return NULL;
      }
-     return active_memtable[1];
+     return active_memtable[rand() % 2];
     //  return mem_; 
 
   }

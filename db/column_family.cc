@@ -1676,7 +1676,7 @@ MemTable* ColumnFamilyMemTablesImpl::GetMemTable(const Slice& key) const {
   // memcpy(p, key.data(), key_size);
   cout<<"key from getmemtable"<<key.data();
   assert(current_ != nullptr);
-  return current_->mem();
+  return current_->mem(key);
 }
 
 ColumnFamilyHandle* ColumnFamilyMemTablesImpl::GetColumnFamilyHandle() {
