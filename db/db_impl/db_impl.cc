@@ -2065,6 +2065,8 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
       ucmp->timestamp_size() > 0 ? get_impl_options.timestamp : nullptr;
   if (!skip_memtable) {
     // Get value associated with key
+    ColumnFamilyMemTables* cf_memtables = column_family_memtables_.get();
+    sv->mem = cf_memtables->GetMemTable(key);
     if (get_impl_options.get_value) {
       if (sv->mem->Get(
               lkey,
