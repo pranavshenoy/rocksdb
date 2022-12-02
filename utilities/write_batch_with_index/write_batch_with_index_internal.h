@@ -207,6 +207,7 @@ class WBWIIteratorImpl : public WBWIIterator {
 
   bool Valid() const override {
     if (!skip_list_iter_.Valid()) {
+      std::cout<<"Valid";
       return false;
     }
     const WriteBatchIndexEntry* iter_entry = skip_list_iter_.key();

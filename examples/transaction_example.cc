@@ -52,13 +52,17 @@ int main() {
   Transaction* txn = txn_db->BeginTransaction(write_options);
   assert(txn);
 
+  std::cout<<"Txn is begun\n";
   // Read a key in this transaction
   s = txn->Get(read_options, "abc", &value);
+  std::cout<<"Get is called\n";
   assert(s.IsNotFound());
+  std::cout<<"Get is called\n";
 
   // Write a key in this transaction
   s = txn->Put("abc", "def");
   assert(s.ok());
+  std::cout<<"Put is called\n";
 
   // Read a key OUTSIDE this transaction. Does not affect txn.
   s = txn_db->Get(read_options, "abc", &value);

@@ -13,6 +13,7 @@
 #include <array>
 #include <limits>
 #include <memory>
+#include <iostream>
 
 #include "db/dbformat.h"
 #include "db/kv_checksum.h"
@@ -1653,6 +1654,7 @@ size_t MemTable::CountSuccessiveMergeEntries(const LookupKey& key) {
 void MemTableRep::Get(const LookupKey& k, void* callback_args,
                       bool (*callback_func)(void* arg, const char* entry)) {
   auto iter = GetDynamicPrefixIterator();
+  std::cout<<"Lookup key "<<k.memtable_key().data()<<"\n";
   for (iter->Seek(k.internal_key(), k.memtable_key().data());
        iter->Valid() && callback_func(callback_args, iter->key());
        iter->Next()) {

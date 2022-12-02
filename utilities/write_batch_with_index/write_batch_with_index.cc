@@ -504,6 +504,7 @@ Status WriteBatchWithIndex::GetFromBatchAndDB(DB* db,
 Status WriteBatchWithIndex::GetFromBatchAndDB(
     DB* db, const ReadOptions& read_options, ColumnFamilyHandle* column_family,
     const Slice& key, PinnableSlice* pinnable_val, ReadCallback* callback) {
+  std::cout<<"GetFromBatchAndDB\n";
   const Comparator* const ucmp = rep->comparator.GetComparator(column_family);
   size_t ts_sz = ucmp ? ucmp->timestamp_size() : 0;
   if (ts_sz > 0 && !read_options.timestamp) {

@@ -395,12 +395,15 @@ WBWIIteratorImpl::Result WBWIIteratorImpl::FindLatestUpdate(
 WBWIIteratorImpl::Result WBWIIteratorImpl::FindLatestUpdate(
     const Slice& key, MergeContext* merge_context) {
   Result result = WBWIIteratorImpl::kNotFound;
+  std::cout<<"result 1 \n"<<result<<"\n";
   merge_context->Clear();  // Clear any entries in the MergeContext
   // TODO(agiardullo): consider adding support for reverse iteration
   if (!Valid()) {
+    std::cout<<"Result 2 "<<result<<"\n";
     return result;
   } else if (comparator_->CompareKey(column_family_id_, Entry().key, key) !=
              0) {
+    std::cout<<"Result 3 "<<result<<"\n";
     return result;
   } else {
     // We want to iterate in the reverse order that the writes were added to the
@@ -450,6 +453,7 @@ WBWIIteratorImpl::Result WBWIIteratorImpl::FindLatestUpdate(
       SeekToFirst();
     }
   }
+  std::cout<<"Result last "<<result;
   return result;
 }
 
@@ -704,8 +708,10 @@ WBWIIteratorImpl::Result WriteBatchWithIndexInternal::GetFromBatch(
   if (result == WBWIIteratorImpl::kError) {
     (*s) = Status::Corruption("Unexpected entry in WriteBatchWithIndex:",
                               std::to_string(iter->Entry().type));
+    std::cout<<"kError\n";
     return result;
   } else if (result == WBWIIteratorImpl::kNotFound) {
+    std::cout<<"kNotFound"<<result<<"\n";
     return result;
   } else if (result == WBWIIteratorImpl::Result::kFound) {  // PUT
     Slice entry_value = iter->Entry().value;
@@ -727,6 +733,7 @@ WBWIIteratorImpl::Result WriteBatchWithIndexInternal::GetFromBatch(
       }
     }
   }
+  std::cout<<"Status ok in GetFromBatch!\n";
   return result;
 }
 

@@ -383,6 +383,7 @@ class ColumnFamilyData {
      if(size == 0) {
       return NULL;
      }
+     // do something
      return active_memtable[rand() % 2];
     //  return mem_; 
 
@@ -403,8 +404,15 @@ class ColumnFamilyData {
     uint64_t memtable_id = last_memtable_id_.fetch_add(1) + 1;
     new_mem->SetID(memtable_id);
     //NOT right 
-    active_memtable.push_back(new_mem);
-    // mem_ = new_mem;
+    if (active_memtable.size() < 2) {
+      active_memtable.push_back(new_mem);
+    }
+    std::cout<<active_memtable.size()<<"\n";
+    // decide which memtable should be assigned to mem_
+    mem1_ = active_memtable[0];
+    if(active_memtable.size() > 1) {
+      mem2_ = active_memtable[1];
+    }
   }
 
   // calculate the oldest log needed for the durability of this column family
@@ -613,7 +621,8 @@ class ColumnFamilyData {
 
   WriteBufferManager* write_buffer_manager_;
 
-  MemTable* mem_;
+  MemTable* mem1_;
+  MemTable* mem2_;
   std::vector<MemTable*> active_memtable;
   MemTableList imm_;
   SuperVersion* super_version_;

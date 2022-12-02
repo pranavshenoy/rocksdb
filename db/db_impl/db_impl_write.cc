@@ -22,7 +22,9 @@ namespace ROCKSDB_NAMESPACE {
 Status DBImpl::Put(const WriteOptions& o, ColumnFamilyHandle* column_family,
                    const Slice& key, const Slice& val) {
   const Status s = FailIfCfHasTs(column_family);
+  std::cout<<"In Put\n";
   if (!s.ok()) {
+    std::cout<<"Put Unscucessful\n";
     return s;
   }
   return DB::Put(o, column_family, key, val);
