@@ -369,16 +369,16 @@ class ColumnFamilyData {
     // std::cout<<"key is "<<s<<"\n";
   
     if (96 < int(tolower(key[0])) && int(tolower(key[0])) < 110) { // 97-109 -> a-m both inclusive
-      std::cout<<"key "<<key.ToString()<<" goes to table 1\n";
+      // std::cout<<"key "<<key.ToString()<<" goes to table 1\n";
       return active_memtable[0];
     }
-    std::cout<<"key "<<key.ToString()<<" goes to table 2\n";
+    // std::cout<<"key "<<key.ToString()<<" goes to table 2\n";
     return active_memtable[1];
   }
   
   MemTable* mem() {
      //PRANAV: THIS IS OUR ROUTER
-     std::cout<<"Size of mem() "<<active_memtable.size()<<std::endl;
+    //  std::cout<<"Size of mem() "<<active_memtable.size()<<std::endl;
      int size = (int) active_memtable.size();
      if(size == 0) {
       return NULL;

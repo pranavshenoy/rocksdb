@@ -63,7 +63,8 @@ class ColumnFamilyMemTablesDefault : public ColumnFamilyMemTables {
 
   // char* p = EncodeVarint32(buf, internal_key_size);
   // memcpy(p, key.data(), key_size);
-  cout<<"key from getmemtable"<<key.data();
+  const char* _key = key.data();
+  cout<<_key<<"\n";
     assert(ok_);
     return mem_;
   }

@@ -1111,7 +1111,7 @@ uint64_t ColumnFamilyData::GetLiveSstFilesSize() const {
 
 MemTable* ColumnFamilyData::ConstructNewMemtable(
     const MutableCFOptions& mutable_cf_options, SequenceNumber earliest_seq) {
-      std::cout<<"New Memtable created with seq. Num "<<earliest_seq<<std::endl;
+      // std::cout<<"New Memtable created with seq. Num "<<earliest_seq<<std::endl;
   return new MemTable(internal_comparator_, ioptions_, mutable_cf_options,
                       write_buffer_manager_, earliest_seq, id_);
 }
@@ -1674,7 +1674,7 @@ MemTable* ColumnFamilyMemTablesImpl::GetMemTable(const Slice& key) const {
 
   // char* p = EncodeVarint32(buf, internal_key_size);
   // memcpy(p, key.data(), key_size);
-  cout<<"key from getmemtable"<<key.data();
+  // cout<<"key from getmemtable"<<key.data();
   assert(current_ != nullptr);
   return current_->mem(key);
 }
