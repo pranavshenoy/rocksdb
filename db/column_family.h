@@ -368,11 +368,15 @@ class ColumnFamilyData {
     // }
     // std::cout<<"key is "<<s<<"\n";
   
+    // if (int(tolower(key[0])) % 2 != 0) { // 97-109 -> a-m both inclusive
+    //   std::cout<<key.ToString()<<" goes to table 1\n";
+    //   return active_memtable[0];
+    // }
     if (96 < int(tolower(key[0])) && int(tolower(key[0])) < 110) { // 97-109 -> a-m both inclusive
       std::cout<<"key "<<key.ToString()<<" goes to table 1\n";
       return active_memtable[0];
     }
-    std::cout<<"key "<<key.ToString()<<" goes to table 2\n";
+    std::cout<<key.ToString()<<" goes to table 2\n";
     return active_memtable[1];
   }
   
@@ -384,7 +388,7 @@ class ColumnFamilyData {
       return NULL;
      }
      // do something
-     return active_memtable[rand() % 2];
+     return active_memtable[0];
     //  return mem_; 
 
   }
