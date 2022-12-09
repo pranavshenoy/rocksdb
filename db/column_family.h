@@ -13,6 +13,8 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
+#include <cctype>
 
 #include "cache/cache_reservation_manager.h"
 #include "db/memtable_list.h"
@@ -349,7 +351,42 @@ class ColumnFamilyData {
   InternalStats* internal_stats() { return internal_stats_.get(); }
 
   MemTableList* imm() { return &imm_; }
-  MemTable* mem() { return mem_; }
+  // MemTable* mem(KEY INT) {
+  //    /*
+  //     ROUTER THAT RETURNS RIGHT MEMTABLE
+  //    */
+  //    //PRANAV: THIS IS OUR ROUTER
+  //    return mem_; 
+
+  // }
+
+  MemTable* mem(const Slice& key) {
+    // std::string s(key.ToString());
+    // string s;
+    // for(size_t i=0; i<key.size(); i++) {
+    //   s += key[i];
+    // }
+    // std::cout<<"key is "<<s<<"\n";
+  
+    if (96 < int(tolower(key[0])) && int(tolower(key[0])) < 110) { // 97-109 -> a-m both inclusive
+      // std::cout<<"key "<<key.ToString()<<" goes to table 1\n";
+      return active_memtable[0];
+    }
+    // std::cout<<"key "<<key.ToString()<<" goes to table 2\n";
+    return active_memtable[1];
+  }
+  
+  MemTable* mem() {
+     //PRANAV: THIS IS OUR ROUTER
+    //  std::cout<<"Size of mem() "<<active_memtable.size()<<std::endl;
+     int size = (int) active_memtable.size();
+     if(size == 0) {
+      return NULL;
+     }
+     return active_memtable[rand() % 2];
+    //  return mem_; 
+
+  }
 
   bool IsEmpty() {
     return mem()->GetFirstSequenceNumber() == 0 && imm()->NumNotFlushed() == 0;
@@ -365,7 +402,9 @@ class ColumnFamilyData {
   void SetMemtable(MemTable* new_mem) {
     uint64_t memtable_id = last_memtable_id_.fetch_add(1) + 1;
     new_mem->SetID(memtable_id);
-    mem_ = new_mem;
+    //NOT right 
+    active_memtable.push_back(new_mem);
+    // mem_ = new_mem;
   }
 
   // calculate the oldest log needed for the durability of this column family
@@ -575,6 +614,7 @@ class ColumnFamilyData {
   WriteBufferManager* write_buffer_manager_;
 
   MemTable* mem_;
+  std::vector<MemTable*> active_memtable;
   MemTableList imm_;
   SuperVersion* super_version_;
 
@@ -819,7 +859,7 @@ class ColumnFamilyMemTablesImpl : public ColumnFamilyMemTables {
   // REQUIRES: Seek() called first
   // REQUIRES: use this function of DBImpl::column_family_memtables_ should be
   //           under a DB mutex OR from a write thread
-  virtual MemTable* GetMemTable() const override;
+  virtual MemTable* GetMemTable(const Slice& key) const override;
 
   // Returns column family handle for the selected column family
   // REQUIRES: use this function of DBImpl::column_family_memtables_ should be

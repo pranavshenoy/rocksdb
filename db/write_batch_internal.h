@@ -21,6 +21,9 @@
 #include "rocksdb/write_batch.h"
 #include "util/autovector.h"
 #include "util/cast_util.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -36,7 +39,7 @@ class ColumnFamilyMemTables {
   // (useful when recovering from log whose updates have already
   // been processed)
   virtual uint64_t GetLogNumber() const = 0;
-  virtual MemTable* GetMemTable() const = 0;
+  virtual MemTable* GetMemTable(const Slice& key) const = 0;
   virtual ColumnFamilyHandle* GetColumnFamilyHandle() = 0;
   virtual ColumnFamilyData* current() { return nullptr; }
 };
@@ -53,7 +56,15 @@ class ColumnFamilyMemTablesDefault : public ColumnFamilyMemTables {
 
   uint64_t GetLogNumber() const override { return 0; }
 
-  MemTable* GetMemTable() const override {
+  MemTable* GetMemTable(const Slice& key) const override {
+  // uint32_t key_size = static_cast<uint32_t>(key.size());
+  // uint32_t internal_key_size = key_size + 8;
+  // char* buf = nullptr;
+
+  // char* p = EncodeVarint32(buf, internal_key_size);
+  // memcpy(p, key.data(), key_size);
+  const char* _key = key.data();
+  cout<<_key<<"\n";
     assert(ok_);
     return mem_;
   }

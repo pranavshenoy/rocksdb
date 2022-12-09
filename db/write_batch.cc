@@ -68,6 +68,9 @@
 #include "util/coding.h"
 #include "util/duplicate_detector.h"
 #include "util/string_util.h"
+#include <iostream>
+
+using namespace std;
 
 namespace ROCKSDB_NAMESPACE {
 
@@ -1945,7 +1948,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
   }
 
-  bool SeekToColumnFamily(uint32_t column_family_id, Status* s) {
+  bool SeekToColumnFamily(uint32_t column_family_id, Status* s, const Slice& key) {
     // If we are in a concurrent mode, it is the caller's responsibility
     // to clone the original ColumnFamilyMemTables so that each thread
     // has its own instance.  Otherwise, it must be guaranteed that there
@@ -1978,7 +1981,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
 
     if (log_number_ref_ > 0) {
-      cf_mems_->GetMemTable()->RefLogContainingPrepSection(log_number_ref_);
+      cf_mems_->GetMemTable(key)->RefLogContainingPrepSection(log_number_ref_);
     }
 
     return true;
@@ -1996,7 +1999,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
 
     Status ret_status;
-    if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
+    if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status, key))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
         // The CF is probably flushed and hence no need for insert but we still
@@ -2014,7 +2017,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
     assert(ret_status.ok());
 
-    MemTable* mem = cf_mems_->GetMemTable();
+    MemTable* mem = cf_mems_->GetMemTable(key);
     auto* moptions = mem->GetImmutableMemTableOptions();
     // inplace_update_support is inconsistent with snapshots, and therefore with
     // any kind of transactions including the ones that use seq_per_batch
@@ -2183,7 +2186,7 @@ class MemTableInserter : public WriteBatch::Handler {
                     const Slice& value, ValueType delete_type,
                     const ProtectionInfoKVOS64* kv_prot_info) {
     Status ret_status;
-    MemTable* mem = cf_mems_->GetMemTable();
+    MemTable* mem = cf_mems_->GetMemTable(key);
     ret_status =
         mem->Add(sequence_, delete_type, key, value, kv_prot_info,
                  concurrent_memtable_writes_, get_post_process_info(mem),
@@ -2209,7 +2212,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
 
     Status ret_status;
-    if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
+    if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status, key))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
         // The CF is probably flushed and hence no need for insert but we still
@@ -2274,7 +2277,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
 
     Status ret_status;
-    if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
+    if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status, key))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
         // The CF is probably flushed and hence no need for insert but we still
@@ -2333,7 +2336,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
 
     Status ret_status;
-    if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
+    if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status, begin_key))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
         // The CF is probably flushed and hence no need for insert but we still
@@ -2423,7 +2426,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
 
     Status ret_status;
-    if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status))) {
+    if (UNLIKELY(!SeekToColumnFamily(column_family_id, &ret_status, key))) {
       if (ret_status.ok() && rebuilding_trx_ != nullptr) {
         assert(!write_after_commit_);
         // The CF is probably flushed and hence no need for insert but we still
@@ -2444,7 +2447,7 @@ class MemTableInserter : public WriteBatch::Handler {
     }
     assert(ret_status.ok());
 
-    MemTable* mem = cf_mems_->GetMemTable();
+    MemTable* mem = cf_mems_->GetMemTable(key);
     auto* moptions = mem->GetImmutableMemTableOptions();
     if (moptions->merge_operator == nullptr) {
       return Status::InvalidArgument(

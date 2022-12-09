@@ -5,10 +5,25 @@
 
 #include <cstdio>
 #include <string>
+#include <fstream>
+#include <iostream>
+#include <execinfo.h>
+#include <stdio.h>
+#include <execinfo.h>
+#include <signal.h>
+#include <stdlib.h>
+#include <unistd.h>
+
 
 #include "rocksdb/db.h"
 #include "rocksdb/options.h"
 #include "rocksdb/slice.h"
+#include "rocksdb/statistics.h"
+#include "rocksdb/system_clock.h"
+#include "rocksdb/perf_context.h"
+
+#include <chrono>
+using namespace std::chrono;
 
 using ROCKSDB_NAMESPACE::DB;
 using ROCKSDB_NAMESPACE::Options;
@@ -24,70 +39,86 @@ std::string kDBPath = "C:\\Windows\\TEMP\\rocksdb_simple_example";
 std::string kDBPath = "/tmp/rocksdb_simple_example";
 #endif
 
-int main() {
-  DB* db;
-  Options options;
-  // Optimize RocksDB. This is the easiest way to get RocksDB to perform well
-  options.IncreaseParallelism();
-  options.OptimizeLevelStyleCompaction();
-  // create the DB if it's not already present
-  options.create_if_missing = true;
+namespace ROCKSDB_NAMESPACE {
+int run(int threads) {
 
-  // open DB
-  Status s = DB::Open(options, kDBPath, &db);
-  assert(s.ok());
+  rocksdb::SetPerfLevel(rocksdb::PerfLevel::kEnableTime);
 
-  // Put key-value
-  s = db->Put(WriteOptions(), "key1", "value");
-  assert(s.ok());
-  std::string value;
-  // get value
-  s = db->Get(ReadOptions(), "key1", &value);
-  assert(s.ok());
-  assert(value == "value");
+  // Create and open a text file
+  std::ofstream MyFile("output.txt");
+    int i=8;
 
-  // atomically apply a set of updates
-  {
-    WriteBatch batch;
-    batch.Delete("key1");
-    batch.Put("key2", value);
-    s = db->Write(WriteOptions(), &batch);
-  }
+    DB* db;
+    Options options;
+    // Optimize RocksDB. This is the easiest way to get RocksDB to perform well
+    options.IncreaseParallelism(i);
+    options.OptimizeLevelStyleCompaction();
+    options.statistics = CreateDBStatistics();
+    // options.write_buffer_size = 128; 
+    // update the size of memtable using this option
 
-  s = db->Get(ReadOptions(), "key1", &value);
-  assert(s.IsNotFound());
+    // create the DB if it's not already present
+    options.create_if_missing = true;
+    ROCKSDB_NAMESPACE::Env* env = ROCKSDB_NAMESPACE::Env::Default();
+    const auto& clock = env->GetSystemClock();
+    // signal(SIGSEGV, handler);   // install our handler
 
-  db->Get(ReadOptions(), "key2", &value);
-  assert(value == "value");
+    // open DB
+    Status s = DB::Open(options, kDBPath, &db);
+    assert(s.ok());
 
-  {
-    PinnableSlice pinnable_val;
-    db->Get(ReadOptions(), db->DefaultColumnFamily(), "key2", &pinnable_val);
-    assert(pinnable_val == "value");
-  }
+    std::vector<std::string> keys;
+    std::ifstream in;
+    in.open("input.txt");
+    std::string str;
+    while (std::getline(in, str))
+    {
+    if(str. size() > 0)
+      keys.push_back(str);
+    }
+    std::cout<<"keys size"<<keys.size()<<"\n";
 
-  {
-    std::string string_val;
-    // If it cannot pin the value, it copies the value to its internal buffer.
-    // The intenral buffer could be set during construction.
-    PinnableSlice pinnable_val(&string_val);
-    db->Get(ReadOptions(), db->DefaultColumnFamily(), "key2", &pinnable_val);
-    assert(pinnable_val == "value");
-    // If the value is not pinned, the internal buffer must have the value.
-    assert(pinnable_val.IsPinned() || string_val == "value");
-  }
+    uint64_t start_time = clock->NowMicros();
 
-  PinnableSlice pinnable_val;
-  s = db->Get(ReadOptions(), db->DefaultColumnFamily(), "key1", &pinnable_val);
-  assert(s.IsNotFound());
-  // Reset PinnableSlice after each use and before each reuse
-  pinnable_val.Reset();
-  db->Get(ReadOptions(), db->DefaultColumnFamily(), "key2", &pinnable_val);
-  assert(pinnable_val == "value");
-  pinnable_val.Reset();
-  // The Slice pointed by pinnable_val is not valid after this point
+    for(int i=0;i<keys.size();i++) {
+      // Put key-value
+      s = db->Put(WriteOptions(), keys[i], "value");
+      assert(s.ok());
+    }
 
-  delete db;
+    uint64_t end_time = clock->NowMicros();
+    double elapsed = static_cast<double>(end_time - start_time) * 1e-6;
 
+    MyFile << i << " " << elapsed << " ";
+
+    // ----- read ------
+
+    start_time = clock->NowMicros();
+
+    for(int i=0;i<keys.size();i++) {
+      std::string value;
+      // get value
+      s = db->Get(ReadOptions(), keys[i], &value);
+      assert(s.ok());
+      assert(value == "value");
+    }
+    end_time = clock->NowMicros();
+    elapsed = static_cast<double>(end_time - start_time) * 1e-6;
+
+    MyFile<< elapsed << " ";
+    MyFile <<static_cast<double>(rocksdb::get_perf_context()->user_key_comparison_count)<<" ";
+    MyFile <<static_cast<double>(rocksdb::get_perf_context()->get_from_memtable_time )<<" ";
+    MyFile <<static_cast<double>(rocksdb::get_perf_context()->write_memtable_time )<<" ";
+
+
+    delete db;
+    MyFile.close();
+    return 0;
+}
+}
+
+using namespace ROCKSDB_NAMESPACE;
+int main(int argc, char** argv) {
+  run(std::atoi(argv[0]));
   return 0;
 }
