@@ -370,9 +370,11 @@ class ColumnFamilyData {
   
     if (96 < int(tolower(key[0])) && int(tolower(key[0])) < 110) { // 97-109 -> a-m both inclusive
       // std::cout<<"key "<<key.ToString()<<" goes to table 1\n";
+      mem_ = active_memtable[0];
       return active_memtable[0];
     }
     // std::cout<<"key "<<key.ToString()<<" goes to table 2\n";
+    mem_ = active_memtable[1];
     return active_memtable[1];
   }
   
@@ -383,8 +385,8 @@ class ColumnFamilyData {
      if(size == 0) {
       return NULL;
      }
-     return active_memtable[rand() % 2];
-    //  return mem_; 
+    //  return active_memtable[rand() % 2];
+     return mem_; 
 
   }
 
@@ -402,8 +404,26 @@ class ColumnFamilyData {
   void SetMemtable(MemTable* new_mem) {
     uint64_t memtable_id = last_memtable_id_.fetch_add(1) + 1;
     new_mem->SetID(memtable_id);
+    int index = -1;
     //NOT right 
-    active_memtable.push_back(new_mem);
+    for(size_t i=0; i<active_memtable.size(); i++) {
+      if(mem_ != nullptr && mem_ == active_memtable[i]) {
+        index = (int) i;
+      }
+    }
+    if (index == -1) {
+      active_memtable.push_back(new_mem);
+    }
+    else {
+      active_memtable[index] = new_mem;
+    }
+
+    mem1_ = active_memtable[0];
+
+    if (active_memtable.size() > 1) {
+      mem2_ = active_memtable[1];
+    }
+
     // mem_ = new_mem;
   }
 
@@ -614,6 +634,8 @@ class ColumnFamilyData {
   WriteBufferManager* write_buffer_manager_;
 
   MemTable* mem_;
+  MemTable* mem1_;
+  MemTable* mem2_;
   std::vector<MemTable*> active_memtable;
   MemTableList imm_;
   SuperVersion* super_version_;

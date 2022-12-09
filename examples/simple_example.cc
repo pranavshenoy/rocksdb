@@ -46,7 +46,7 @@ int main() {
 
   std::vector<std::string> keys;
   std::ifstream in;
-  in.open("input.txt");
+  in.open("input_new.txt");
   std::string str;
   // Read the next line from File untill it reaches the end.
   while (std::getline(in, str))
@@ -60,6 +60,7 @@ int main() {
   for(int i=0;i<keys.size();i++) {
     // Put key-value
     s = db->Put(WriteOptions(), keys[i], "value");
+    // std::cout<<"key "<<keys[i]<<"\n";
     assert(s.ok());
 
     std::string value;

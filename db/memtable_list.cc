@@ -409,6 +409,7 @@ void MemTableList::PickMemtablesToFlush(uint64_t max_memtable_id,
     }
     if (!m->flush_in_progress_) {
       assert(!m->flush_completed_);
+      std::cout<<"FLUSH did not work\n";
       num_flush_not_started_--;
       if (num_flush_not_started_ == 0) {
         imm_flush_needed.store(false, std::memory_order_release);
@@ -468,6 +469,7 @@ Status MemTableList::TryInstallMemtableFlushResults(
   mu->AssertHeld();
 
   // Flush was successful
+  std::cout<<"FLUSH SUCCESSFULL\n";
   // Record the status on the memtable object. Either this call or a call by a
   // concurrent flush thread will read the status and write it to manifest.
   for (size_t i = 0; i < mems.size(); ++i) {

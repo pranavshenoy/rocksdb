@@ -551,7 +551,8 @@ ColumnFamilyData::ColumnFamilyData(
       is_delete_range_supported_(
           cf_options.table_factory->IsDeleteRangeSupported()),
       write_buffer_manager_(write_buffer_manager),
-      mem_(nullptr),
+      mem1_(nullptr),
+      mem2_(nullptr),
       imm_(ioptions_.min_write_buffer_number_to_merge,
            ioptions_.max_write_buffer_number_to_maintain,
            ioptions_.max_write_buffer_size_to_maintain),
@@ -697,8 +698,11 @@ ColumnFamilyData::~ColumnFamilyData() {
     assert(deleted);
   }
 
-  if (mem_ != nullptr) {
-    delete mem_->Unref();
+  if (mem1_ != nullptr) {
+    delete mem1_->Unref();
+  }
+  if (mem2_ != nullptr) {
+    delete mem2_->Unref();
   }
   autovector<MemTable*> to_delete;
   imm_.current()->Unref(&to_delete);
@@ -1118,15 +1122,17 @@ MemTable* ColumnFamilyData::ConstructNewMemtable(
 
 void ColumnFamilyData::CreateNewMemtable(
     const MutableCFOptions& mutable_cf_options, SequenceNumber earliest_seq) {
-  if (mem_ != nullptr) {
-    delete mem_->Unref();
+  if (mem1_ != nullptr) {
+    delete mem1_->Unref();
   }
-  MemTable* mt1 = ConstructNewMemtable(mutable_cf_options, earliest_seq);
-  MemTable* mt2 = ConstructNewMemtable(mutable_cf_options, earliest_seq);
-  SetMemtable(mt1);
-  SetMemtable(mt2);
-  mt1->Ref();
-  mt2->Ref();
+  if (mem2_ != nullptr) {
+    delete mem2_->Unref();
+  }
+  
+  SetMemtable(ConstructNewMemtable(mutable_cf_options, earliest_seq));
+  SetMemtable(ConstructNewMemtable(mutable_cf_options, earliest_seq));
+  mem1_->Ref();
+  mem2_->Ref();
   // SetMemtable(ConstructNewMemtable(mutable_cf_options, earliest_seq));
   // mem_->Ref();
 }
@@ -1334,7 +1340,8 @@ void ColumnFamilyData::InstallSuperVersion(
   ++super_version_number_;
   super_version_->version_number = super_version_number_;
   if (old_superversion == nullptr || old_superversion->current != current() ||
-      old_superversion->mem != mem_ ||
+      old_superversion->mem != mem1_ ||
+      old_superversion->mem != mem2_ ||
       old_superversion->imm != imm_.current()) {
     // Should not recalculate slow down condition if nothing has changed, since
     // currently RecalculateWriteStallConditions() treats it as further slowing

@@ -2049,6 +2049,7 @@ Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteContext* context) {
     return s;
   }
 
+std::cout<<"THIS IS WORKIN";
   // Attempt to switch to a new memtable and trigger flush of old.
   // Do this without holding the dbmutex lock.
   assert(versions_->prev_log_number() == 0);
@@ -2233,6 +2234,7 @@ Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteContext* context) {
   cfd->imm()->Add(cfd->mem(), &context->memtables_to_free_);
   new_mem->Ref();
   cfd->SetMemtable(new_mem);
+  std::cout<<"This Too is WORK\n";
   InstallSuperVersionAndScheduleWork(cfd, &context->superversion_context,
                                      mutable_cf_options);
 

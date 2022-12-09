@@ -6,8 +6,8 @@ import random
 arr = [] 
 # using random.choices()
 # generating random strings
-f = open("input.txt", "a")
-for i in range(0,2000000):
+f = open("input_new.txt", "a")
+for i in range(0,8000000):
     res = ''.join(random.choices(string.ascii_letters +
                                 string.digits, k=random.randint(1,20)))
     arr.append(res)
