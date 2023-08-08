@@ -1881,6 +1881,7 @@ Status DBImpl::Get(const ReadOptions& read_options,
   get_impl_options.column_family = column_family;
   get_impl_options.value = value;
   get_impl_options.timestamp = timestamp;
+   std::cout<<"Status ok in db_impl.cc Get\n";
   Status s = GetImpl(read_options, key, get_impl_options);
   return s;
 }
@@ -1948,11 +1949,13 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
                                         *(read_options.timestamp),
                                         /*ts_for_read=*/true);
     if (!s.ok()) {
+       std::cout<<"Status not ok in db_impl.cc GetImpl 1\n";
       return s;
     }
   } else {
     const Status s = FailIfCfHasTs(get_impl_options.column_family);
     if (!s.ok()) {
+       std::cout<<"Status ok in db_impl.cc GetImpl 2\n";
       return s;
     }
   }
@@ -2065,6 +2068,8 @@ Status DBImpl::GetImpl(const ReadOptions& read_options, const Slice& key,
       ucmp->timestamp_size() > 0 ? get_impl_options.timestamp : nullptr;
   if (!skip_memtable) {
     // Get value associated with key
+    ColumnFamilyMemTables* cf_memtables = column_family_memtables_.get();
+    sv->mem = cf_memtables->GetMemTable(key);
     if (get_impl_options.get_value) {
       if (sv->mem->Get(
               lkey,

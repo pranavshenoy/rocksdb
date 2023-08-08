@@ -35,6 +35,7 @@
 #include <stdlib.h>
 
 #include <atomic>
+#include <iostream>
 
 #include "memory/allocator.h"
 #include "port/port.h"
@@ -223,6 +224,9 @@ inline void SkipList<Key, Comparator>::Iterator::SetList(const SkipList* list) {
 
 template <typename Key, class Comparator>
 inline bool SkipList<Key, Comparator>::Iterator::Valid() const {
+  if (node_ == nullptr) {
+    std::cout<<"Node \n"<<node_;
+  }
   return node_ != nullptr;
 }
 
@@ -251,6 +255,7 @@ inline void SkipList<Key, Comparator>::Iterator::Prev() {
 
 template <typename Key, class Comparator>
 inline void SkipList<Key, Comparator>::Iterator::Seek(const Key& target) {
+  std::cout<<"Seek\n";
   node_ = list_->FindGreaterOrEqual(target);
 }
 

@@ -22,7 +22,9 @@ namespace ROCKSDB_NAMESPACE {
 Status DBImpl::Put(const WriteOptions& o, ColumnFamilyHandle* column_family,
                    const Slice& key, const Slice& val) {
   const Status s = FailIfCfHasTs(column_family);
+  std::cout<<"In Put\n";
   if (!s.ok()) {
+    std::cout<<"Put Unscucessful\n";
     return s;
   }
   return DB::Put(o, column_family, key, val);
@@ -2072,6 +2074,7 @@ Status DBImpl::SwitchMemtable(ColumnFamilyData* cfd, WriteContext* context) {
 #ifndef ROCKSDB_LITE
   MemTableInfo memtable_info;
   memtable_info.cf_name = cfd->GetName();
+  // try to get which index of active memtable is returned
   memtable_info.first_seqno = cfd->mem()->GetFirstSequenceNumber();
   memtable_info.earliest_seqno = cfd->mem()->GetEarliestSequenceNumber();
   memtable_info.num_entries = cfd->mem()->num_entries();

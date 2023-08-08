@@ -2766,6 +2766,7 @@ inline Status DBImpl::FailIfCfHasTs(
 inline Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
                                          const Slice& ts,
                                          bool ts_for_read) const {
+  std::cout<<"Status ok in FAilIfMism...\n";
   if (!column_family) {
     return Status::InvalidArgument("column family handle cannot be null");
   }
@@ -2798,6 +2799,7 @@ inline Status DBImpl::FailIfTsMismatchCf(ColumnFamilyHandle* column_family,
       return Status::InvalidArgument(oss.str());
     }
   }
+  std::cout<<"Status ok in FAilIfMism...\n";
   return Status::OK();
 }
 

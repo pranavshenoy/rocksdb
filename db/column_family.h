@@ -14,6 +14,7 @@
 #include <unordered_map>
 #include <vector>
 #include <iostream>
+#include <cctype>
 
 #include "cache/cache_reservation_manager.h"
 #include "db/memtable_list.h"
@@ -358,6 +359,26 @@ class ColumnFamilyData {
   //    return mem_; 
 
   // }
+
+  MemTable* mem(const Slice& key) {
+    // std::string s(key.ToString());
+    // string s;
+    // for(size_t i=0; i<key.size(); i++) {
+    //   s += key[i];
+    // }
+    // std::cout<<"key is "<<s<<"\n";
+  
+    // if (int(tolower(key[0])) % 2 != 0) { // 97-109 -> a-m both inclusive
+    //   std::cout<<key.ToString()<<" goes to table 1\n";
+    //   return active_memtable[0];
+    // }
+    if (96 < int(tolower(key[0])) && int(tolower(key[0])) < 110) { // 97-109 -> a-m both inclusive
+      std::cout<<"key "<<key.ToString()<<" goes to table 1\n";
+      return active_memtable[0];
+    }
+    std::cout<<key.ToString()<<" goes to table 2\n";
+    return active_memtable[1];
+  }
   
   MemTable* mem() {
      //PRANAV: THIS IS OUR ROUTER
@@ -366,7 +387,8 @@ class ColumnFamilyData {
      if(size == 0) {
       return NULL;
      }
-     return active_memtable[1];
+     // do something
+     return active_memtable[0];
     //  return mem_; 
 
   }
@@ -386,8 +408,15 @@ class ColumnFamilyData {
     uint64_t memtable_id = last_memtable_id_.fetch_add(1) + 1;
     new_mem->SetID(memtable_id);
     //NOT right 
-    active_memtable.push_back(new_mem);
-    // mem_ = new_mem;
+    if (active_memtable.size() < 2) {
+      active_memtable.push_back(new_mem);
+    }
+    std::cout<<active_memtable.size()<<"\n";
+    // decide which memtable should be assigned to mem_
+    mem1_ = active_memtable[0];
+    if(active_memtable.size() > 1) {
+      mem2_ = active_memtable[1];
+    }
   }
 
   // calculate the oldest log needed for the durability of this column family
@@ -596,7 +625,8 @@ class ColumnFamilyData {
 
   WriteBufferManager* write_buffer_manager_;
 
-  MemTable* mem_;
+  MemTable* mem1_;
+  MemTable* mem2_;
   std::vector<MemTable*> active_memtable;
   MemTableList imm_;
   SuperVersion* super_version_;

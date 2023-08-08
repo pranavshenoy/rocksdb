@@ -16,6 +16,7 @@
 #include <string>
 #include <unordered_map>
 #include <vector>
+#include <iostream>
 
 #include "rocksdb/block_cache_trace_writer.h"
 #include "rocksdb/iterator.h"
@@ -528,6 +529,7 @@ class DB {
     assert(!pinnable_val.IsPinned());
     auto s = Get(options, column_family, key, &pinnable_val);
     if (s.ok() && pinnable_val.IsPinned()) {
+      std::cout<<"Status ok in db.h Get\n";
       value->assign(pinnable_val.data(), pinnable_val.size());
     }  // else value is already assigned
     return s;
